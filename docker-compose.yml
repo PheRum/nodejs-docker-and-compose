@@ -1,0 +1,45 @@
+services:
+  frontend:
+    container_name: kupi-frontend
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    networks:
+      - frontend
+
+  backend:
+    container_name: kupi-backend
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    ports:
+      - "4000:3000"
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    networks:
+      - backend
+    restart: unless-stopped
+
+  postgres:
+    container_name: kupi-database
+    image: postgres:17-alpine
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    env_file:
+      - .env
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+volumes:
+  postgres_data:
+
+networks:
+  frontend:
+  backend:
